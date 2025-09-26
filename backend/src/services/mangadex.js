@@ -233,6 +233,53 @@ class MangaDexService {
     };
   }
 
+  // Obtenir les pages d'un chapitre
+  async getChapterPages(chapterId) {
+    const cacheKey = this.getCacheKey('chapter-pages', { chapterId });
+    const cached = this.getCache(cacheKey);
+    if (cached) return cached;
+
+    try {
+      // D'abord obtenir les infos du chapitre
+      const chapterResponse = await this.client.get(`/chapter/${chapterId}`);
+      
+      if (!chapterResponse.data.data) {
+        throw new Error('Chapitre non trouvé');
+      }
+
+      // Ensuite obtenir le serveur de pages
+      const pagesResponse = await this.client.get(`/at-home/server/${chapterId}`);
+      
+      if (!pagesResponse.data.baseUrl) {
+        throw new Error('Serveur de pages non disponible');
+      }
+
+      const { baseUrl, chapter } = pagesResponse.data;
+      const { hash, data: pageFiles } = chapter;
+
+      // Construire les URLs des pages
+      const pages = pageFiles.map((filename, index) => ({
+        pageNumber: index + 1,
+        url: `${baseUrl}/data/${hash}/${filename}`,
+        filename
+      }));
+
+      const result = {
+        chapterId,
+        pages,
+        totalPages: pages.length,
+        hash
+      };
+
+      this.setCache(cacheKey, result);
+      return result;
+
+    } catch (error) {
+      console.error('Erreur récupération pages chapitre:', error.message);
+      throw new Error('Erreur lors de la récupération des pages du chapitre');
+    }
+  }
+
   formatChapterList(response) {
     return {
       data: response.data?.map(chapter => ({

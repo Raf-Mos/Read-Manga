@@ -12,10 +12,14 @@ const Reader = () => {
   const [zoom, setZoom] = useState(100);
   const [showControls, setShowControls] = useState(true);
 
-  const { data: chapterPages, isLoading, error } = useQuery(
+  const { data: chapterPages, isLoading, error, refetch } = useQuery(
     ['chapterPages', chapterId],
     () => mangaService.getChapterPages(chapterId),
-    { enabled: !!chapterId }
+    { 
+      enabled: !!chapterId,
+      retry: 3,
+      retryDelay: 1000
+    }
   );
 
   // Auto-hide controls after 3 seconds of inactivity
@@ -90,13 +94,25 @@ const Reader = () => {
         <div className="text-center text-white">
           <h2 className="text-2xl font-bold mb-4">Erreur de chargement</h2>
           <p className="mb-6">Impossible de charger les pages du chapitre</p>
-          <button
-            onClick={() => navigate(-1)}
-            className="btn bg-white text-black hover:bg-gray-100"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Retour
-          </button>
+          <p className="text-sm text-gray-300 mb-6">
+            {error?.message || 'Erreur inconnue'}
+          </p>
+          <div className="flex gap-4 justify-center">
+            <button
+              onClick={() => refetch()}
+              className="btn bg-blue-600 text-white hover:bg-blue-700"
+            >
+              <RotateCcw className="h-4 w-4 mr-2" />
+              Réessayer
+            </button>
+            <button
+              onClick={() => navigate(-1)}
+              className="btn bg-white text-black hover:bg-gray-100"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Retour
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -111,7 +127,7 @@ const Reader = () => {
     >
       {/* Page d'image */}
       <div className="flex items-center justify-center min-h-screen p-4">
-        {currentPageData && (
+        {currentPageData ? (
           <img
             src={currentPageData.url}
             alt={`Page ${currentPage}`}
@@ -121,10 +137,18 @@ const Reader = () => {
               transformOrigin: 'center'
             }}
             onError={(e) => {
-              e.target.src = '/placeholder-page.jpg';
+              console.log('Erreur chargement image:', currentPageData.url);
+              e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjYwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzk3YTNiNCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlIG5vbiBkaXNwb25pYmxlPC90ZXh0Pjwvc3ZnPg==';
             }}
             onClick={goToNextPage}
           />
+        ) : (
+          <div className="flex items-center justify-center h-96 text-white">
+            <div className="text-center">
+              <p className="text-lg mb-2">Page non disponible</p>
+              <p className="text-sm text-gray-300">Page {currentPage} introuvable</p>
+            </div>
+          </div>
         )}
       </div>
 

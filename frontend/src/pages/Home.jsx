@@ -29,10 +29,13 @@ const Home = () => {
           }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        <div className="absolute bottom-0 left-0 right-0 p-3 text-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-          <h3 className="font-medium text-sm mb-1 line-clamp-2">
+        <div className="absolute bottom-0 left-0 right-0 p-3 text-gray-100 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+          <h3 className="font-medium text-sm mb-1 line-clamp-2 text-blue-400">
             {manga.title?.en || manga.title?.ar || 'Titre non disponible'}
           </h3>
+          <p className="text-xs text-gray-300 mb-1">
+            {manga.author && <span>{manga.author}</span>}
+          </p>
           <p className="text-xs text-gray-300">
             {manga.status && (
               <span className="capitalize">{manga.status}</span>
@@ -47,9 +50,21 @@ const Home = () => {
         <h3 className="font-medium text-sm text-gray-900 mb-1 line-clamp-2">
           {manga.title?.en || manga.title?.ar || 'Titre non disponible'}
         </h3>
-        <p className="text-xs text-gray-500">
-          {manga.author && <span>{manga.author}</span>}
-        </p>
+        <div className="space-y-1">
+          {manga.author && (
+            <p className="text-xs text-gray-600 font-medium">
+              {manga.author}
+            </p>
+          )}
+          <p className="text-xs text-gray-500">
+            {manga.status && (
+              <span className="capitalize">{manga.status}</span>
+            )}
+            {manga.year && (
+              <span> • {manga.year}</span>
+            )}
+          </p>
+        </div>
       </div>
     </Link>
   );

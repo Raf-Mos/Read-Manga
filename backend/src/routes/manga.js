@@ -46,6 +46,7 @@ router.get('/search', mangaLimiter, [
     .withMessage('Statut invalide')
 ], handleValidationErrors, optionalAuth, async (req, res) => {
   try {
+    console.log('🔍 Nouvelle recherche:', req.query); // ← LOG DE DEBUG AJOUTÉ
     const { title, limit, offset, status, includedTags, excludedTags } = req.query;
     
     const searchParams = {
@@ -197,6 +198,16 @@ router.get('/chapter/:chapterId/pages', mangaLimiter, [
     console.error('Erreur récupération pages:', error);
     res.status(500).json({ message: error.message || 'Erreur lors de la récupération des pages' });
   }
+});
+
+// GET /api/manga/debug - Route de debug
+router.get('/debug', (req, res) => {
+  console.log('🐛 Route de debug appelée à:', new Date().toLocaleTimeString());
+  res.json({ 
+    message: 'Debug endpoint working!', 
+    timestamp: new Date().toISOString(),
+    nodeEnv: process.env.NODE_ENV 
+  });
 });
 
 // GET /api/manga/cache/stats - Statistiques du cache (dev uniquement)
